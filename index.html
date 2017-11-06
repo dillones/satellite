@@ -1,0 +1,97 @@
+<html>
+<!DOCTYPE html>
+<head>
+  <title>Satellite</title>
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  <style>
+    body {
+      background: #000;
+      margin: 0;
+      overflow: hidden;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r84/three.min.js"></script>
+<script src="js/satellite.min.js"></script>
+<script>
+
+window.onload = init;
+window.onresize = resize;
+
+var scene, camera, renderer,  satellite;
+
+function init(){
+
+	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.01, 1000 );
+  camera.position.z = 20;
+	renderer = new THREE.WebGLRenderer();
+	document.body.appendChild( renderer.domElement );
+
+  resize();
+
+  // Create a new Satellite and connect event listeners
+  satellite = new Satellite(camera);
+  satellite.connect();
+
+  generate();
+	main();
+
+}
+
+function resize(){
+
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setPixelRatio(.5);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+
+}
+
+
+var main = function () {
+
+	requestAnimationFrame(main);
+  satellite.update();
+	renderer.render(scene, camera);
+
+}
+
+function generate(){
+
+  var geometry = new THREE.IcosahedronGeometry( 6,2 );
+  var points = new THREE.IcosahedronGeometry( 900,3 );
+	var material = new THREE.MeshPhongMaterial( { color: 0xffffff, wireframe: false, shading: THREE.FlatShading } );
+  var wireframe = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: false })
+
+	var mesh = new THREE.Mesh( geometry, material );
+  var wire = new THREE.Points(points, wireframe);
+  var light = new THREE.HemisphereLight( 0x092428, 0xffffff, 1 );
+
+  renderer.setClearColor(0x092428);
+  var n = 0;
+
+  while( n < 200 ){
+  for ( var i in mesh.geometry.vertices ){
+      var d = Math.random()-0.5;
+      var o = Math.random();
+      if( o < 0.01 ){
+        mesh.geometry.vertices[i].multiplyScalar(1+d*0.3);
+      }
+  }
+
+  mesh.geometry.verticesNeedUpdate = true;
+  n++;
+  }
+
+  scene.add( mesh );
+  scene.add( wire );
+  scene.add( light );
+
+}
+
+</script>
+</body>
+</html>
